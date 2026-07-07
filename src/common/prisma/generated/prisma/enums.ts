@@ -9,7 +9,24 @@
 * 🟢 You can import this file directly.
 */
 
+export const Subscription_Plan = {
+  FREE: 'FREE',
+  PRO: 'PRO',
+  ENTERPRISE: 'ENTERPRISE'
+} as const
+
+export type Subscription_Plan = (typeof Subscription_Plan)[keyof typeof Subscription_Plan]
 
 
-// This file is empty because there are no enums in the schema.
-export {}
+export const Subscription_Status = {
+  INCOMPLETE: 'INCOMPLETE',
+  INCOMPLETE_EXPIRED: 'INCOMPLETE_EXPIRED',
+  TRIALING: 'TRIALING',
+  ACTIVE: 'ACTIVE',
+  PAST_DUE: 'PAST_DUE',
+  CANCELED: 'CANCELED',
+  UNPAID: 'UNPAID',
+  PAUSED: 'PAUSED'
+} as const
+
+export type Subscription_Status = (typeof Subscription_Status)[keyof typeof Subscription_Status]

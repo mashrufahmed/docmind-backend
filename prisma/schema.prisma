@@ -8,6 +8,23 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Subscription_Plan {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+enum Subscription_Status {
+  INCOMPLETE
+  INCOMPLETE_EXPIRED
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+  PAUSED
+}
+
 model User {
   id            String    @id @default(nanoid())
   name          String
@@ -77,14 +94,16 @@ model Verification {
 }
 
 model Organization {
-  id          String       @id @default(nanoid())
-  name        String
-  slug        String
-  logo        String?
-  createdAt   DateTime
-  metadata    String?
-  members     Member[]
-  invitations Invitation[]
+  id            String          @id @default(nanoid())
+  name          String
+  slug          String
+  logo          String?
+  createdAt     DateTime
+  metadata      String?
+  members       Member[]
+  invitations   Invitation[]
+  stripeAccount Stripe_Account?
+  subscription  Subscription?
 
   @@unique([slug])
   @@map("organization")
@@ -119,4 +138,53 @@ model Invitation {
   @@index([organizationId])
   @@index([email])
   @@map("invitation")
+}
+
+model Stripe_Account {
+  id                 String       @id @default(nanoid())
+  organizationId     String       @unique
+  organization       Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  stripe_customer_id String
+  createdAt          DateTime     @default(now())
+
+  @@map("stripe_account")
+}
+
+model Plan {
+  id            String            @id @default(nanoid())
+  name          Subscription_Plan @unique
+  description   String?
+  price         Decimal           @db.Decimal(10, 2)
+  currency      String            @default("usd")
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  id                   String              @id @default(nanoid())
+  organizationId       String              @unique
+  organization         Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  planId               String
+  plan                 Plan                @relation(fields: [planId], references: [id])
+  stripeSubscriptionId String?
+  stripeCustomerId     String?
+  status               Subscription_Status
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean             @default(false)
+  canceledAt           DateTime?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+}
+
+model file {
+  id         String   @id @default(nanoid())
+  url        String
+  publicId   String
+  identifier String
+  fileType   String
+  fileSize   Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }

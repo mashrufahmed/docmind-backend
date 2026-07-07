@@ -74,3 +74,23 @@ export type Member = Prisma.MemberModel
  * 
  */
 export type Invitation = Prisma.InvitationModel
+/**
+ * Model Stripe_Account
+ * 
+ */
+export type Stripe_Account = Prisma.Stripe_AccountModel
+/**
+ * Model Plan
+ * 
+ */
+export type Plan = Prisma.PlanModel
+/**
+ * Model Subscription
+ * 
+ */
+export type Subscription = Prisma.SubscriptionModel
+/**
+ * Model File
+ * 
+ */
+export type File = Prisma.FileModel

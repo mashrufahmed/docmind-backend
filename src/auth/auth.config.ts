@@ -3,10 +3,14 @@ import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { organization } from 'better-auth/plugins';
 import { PrismaService } from 'src/common/prisma/prisma.service';
+import { BAuthService } from './../b-auth/b-auth.service';
 
-
-export const auth = (prisma: PrismaService, config: ConfigService) =>
-  betterAuth({
+export const auth = (
+  prisma: PrismaService,
+  config: ConfigService,
+  BAuthService: BAuthService,
+) => {
+  return betterAuth({
     appName: config.getOrThrow('APP_NAME'),
     secret: config.getOrThrow('BETTER_AUTH_SECRET'),
     baseURL: config.getOrThrow('BETTER_AUTH_BASE_URL'),
@@ -15,7 +19,22 @@ export const auth = (prisma: PrismaService, config: ConfigService) =>
       provider: 'postgresql',
     }),
 
-    plugins: [organization()],
+    plugins: [
+      organization({
+        organizationHooks: {
+          allowUserToCreateOrganization: async (data) => {
+            console.log(data);
+          },
+          afterCreateOrganization: async ({ organization, user }) => {
+            await BAuthService.createStripeCustomer({
+              email: user.email,
+              name: user.name,
+              organizationId: organization.id,
+            });
+          },
+        },
+      }),
+    ],
 
     emailAndPassword: {
       enabled: true,
@@ -34,6 +53,8 @@ export const auth = (prisma: PrismaService, config: ConfigService) =>
       updateAge: 60 * 60 * 24, // 1 day
     },
   });
+};
+
 // export const auth = betterAuth({
 //   appName: process.env.APP_NAME,
 //   secret: process.env.BETTER_AUTH_SECRET,

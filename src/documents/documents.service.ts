@@ -1,0 +1,43 @@
+import { Injectable } from '@nestjs/common';
+import { FileService } from 'src/common/file/file.service';
+import { PrismaService } from 'src/common/prisma/prisma.service';
+
+@Injectable()
+export class DocumentsService {
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly fileService: FileService,
+  ) { }
+  
+  async uploadDocument({
+    file,
+    organizationId,
+  }: {
+    file: Express.Multer.File;
+    organizationId: string;
+  }) {
+    const uploadedFile = await this.fileService.uploadFile(file);
+    if (uploadedFile) {
+      await this.prismaService.file.create({
+        data: {
+          url: uploadedFile.secure_url,
+          publicId: uploadedFile.public_id,
+          identifier: organizationId,
+          fileType: uploadedFile.format,
+        },
+      });
+    }
+    return {
+      url: uploadedFile.secure_url,
+    };
+  }
+
+
+  async getAllDocuments (organizationId: string) {
+    return await this.prismaService.file.findMany({
+      where: {
+        identifier: organizationId,
+      },
+    });
+  }
+}
