@@ -54,6 +54,7 @@ export const auth = (
     },
   });
 };
+export type Auth = ReturnType<typeof auth>;
 
 // export const auth = betterAuth({
 //   appName: process.env.APP_NAME,
