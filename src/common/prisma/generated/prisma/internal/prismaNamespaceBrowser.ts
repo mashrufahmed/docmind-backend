@@ -219,10 +219,13 @@ export type SubscriptionScalarFieldEnum = (typeof SubscriptionScalarFieldEnum)[k
 
 export const FileScalarFieldEnum = {
   id: 'id',
+  fileName: 'fileName',
+  fileType: 'fileType',
+  mimeType: 'mimeType',
+  fileSize: 'fileSize',
   url: 'url',
   publicId: 'publicId',
   identifier: 'identifier',
-  fileType: 'fileType',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

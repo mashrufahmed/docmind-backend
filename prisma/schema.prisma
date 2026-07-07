@@ -159,6 +159,8 @@ model Plan {
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
   subscriptions Subscription[]
+
+  @@map("plan")
 }
 
 model Subscription {
@@ -176,15 +178,25 @@ model Subscription {
   canceledAt           DateTime?
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt
+
+  @@map("subscription")
 }
 
-model file {
-  id         String   @id @default(nanoid())
+model File {
+  id String @id @default(nanoid())
+
+  fileName String
+  fileType String
+  mimeType String
+
+  fileSize Int
+
   url        String
   publicId   String
   identifier String
-  fileType   String
-  fileSize   Int
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("file")
 }
