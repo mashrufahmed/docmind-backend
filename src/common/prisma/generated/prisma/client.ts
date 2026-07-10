@@ -94,3 +94,8 @@ export type Subscription = Prisma.SubscriptionModel
  * 
  */
 export type File = Prisma.FileModel
+/**
+ * Model DocumentChunk
+ * 
+ */
+export type DocumentChunk = Prisma.DocumentChunkModel

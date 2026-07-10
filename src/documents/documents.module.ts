@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
+import { AiModule } from 'src/ai/ai.module';
 import { FileService } from 'src/common/file/file.service';
+import { ChunkService } from '../ai/chunk/chunk.service';
 import { DocumentProcessor } from '../common/queue/processor/document.processor';
 import { DocumentsController } from './documents.controller';
 import { DocumentsService } from './documents.service';
@@ -11,6 +13,7 @@ import { TextParser } from './parsers/text.parser';
 import { WordParser } from './parsers/word.parser';
 
 @Module({
+  imports: [AiModule],
   controllers: [DocumentsController],
   providers: [
     DocumentsService,

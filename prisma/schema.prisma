@@ -171,10 +171,28 @@ model File {
   mimeType   String
   status     FileStatus
   message    String?
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
 
+  chunks DocumentChunk[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([identifier, id])
   @@map("file")
+}
+
+model DocumentChunk {
+  id         String                 @id @default(nanoid())
+  documentId String
+  document   File                   @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  chunkIndex Int
+  content    String                 @db.Text
+  embedding  Unsupported("vector")?
+  metadata   Json?
+  createdAt  DateTime               @default(now())
+
+  @@index([documentId])
+  @@map("document_chunk")
 }
 
 enum Subscription_Plan {

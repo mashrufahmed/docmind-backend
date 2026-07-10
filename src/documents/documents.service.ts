@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   MessageEvent as MEvent,
   NotFoundException,
@@ -8,6 +9,7 @@ import { Response } from 'express';
 import * as https from 'https';
 import path from 'path';
 import { Subject } from 'rxjs';
+import { AiService } from 'src/ai/ai.service';
 import { FileService } from 'src/common/file/file.service';
 import { FileStatus } from 'src/common/prisma/generated/prisma/enums';
 import { PrismaService } from 'src/common/prisma/prisma.service';
@@ -20,6 +22,7 @@ export class DocumentsService {
     private readonly fileService: FileService,
     private readonly queueService: QueueService,
     private readonly parserFactory: ParserFactory,
+    private readonly aiService: AiService,
   ) {}
   private subjects = new Map<string, Subject<MEvent>>();
 
@@ -30,18 +33,12 @@ export class DocumentsService {
     file: Express.Multer.File;
     organizationId: string;
   }) {
-    console.time('cloudinary');
-
     const uploadedFile = await this.fileService.uploadFile(file);
-
-    console.timeEnd('cloudinary');
     const fileType =
       path.extname(file.originalname).replace('.', '').toLowerCase() ||
       'unknown';
 
     if (uploadedFile) {
-      console.time('prisma');
-
       const data = await this.prismaService.file.create({
         data: {
           url: uploadedFile.secure_url,
@@ -56,7 +53,6 @@ export class DocumentsService {
       });
 
       await this.queueService.processFile({ documentId: data.id });
-      console.timeEnd('prisma');
     }
     return {
       url: uploadedFile.secure_url,
@@ -127,6 +123,9 @@ export class DocumentsService {
     const buffer = Buffer.from(await response.arrayBuffer());
     const parser = this.parserFactory.get(file?.mimeType as string);
     const text = await parser.parse(buffer);
-    console.log(text);
+    if (!text.trim()) {
+      throw new BadRequestException('Document contains no readable text');
+    }
+    return await this.aiService.processForLLM(text, file?.id as string);
   }
 }

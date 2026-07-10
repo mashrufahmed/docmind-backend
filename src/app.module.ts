@@ -11,6 +11,7 @@ import { QueueModule } from './common/queue/queue.module';
 import { DocumentsModule } from './documents/documents.module';
 import { PaymentModule } from './payment/payment.module';
 import { UserModule } from './user/user.module';
+import { AiModule } from './ai/ai.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { UserModule } from './user/user.module';
     UserModule,
     PaymentModule,
     DocumentsModule,
+    AiModule,
   ],
 })
 export class AppModule {}
