@@ -9,7 +9,7 @@ export class EmbeddingService {
   constructor() {}
   private readonly embeddings = new GoogleGenerativeAIEmbeddings({
     apiKey: process.env.GOOGLE_API_KEY,
-    model: 'text-embedding-3-small',
+    model: 'gemini-embedding-2',
   });
 
   async embedDocuments(texts: string[]) {

@@ -25,7 +25,6 @@ export class FileService {
           resource_type: 'auto',
         },
         (error, result) => {
-          console.log(error);
           if (error) return reject(error);
           resolve(result!);
         },
