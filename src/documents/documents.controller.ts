@@ -3,18 +3,22 @@ import {
   ForbiddenException,
   Get,
   MaxFileSizeValidator,
+  MessageEvent,
   Param,
   ParseFilePipe,
   Post,
+  Res,
+  Sse,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Session, type UserSession } from '@thallesp/nestjs-better-auth';
+import type { Response } from 'express';
 import 'multer';
+import { Observable } from 'rxjs';
 import { DocumentsService } from './documents.service';
 
-// @UseGuards(AuthGuard)
 @Controller('documents')
 export class DocumentsController {
   constructor(private readonly documentsService: DocumentsService) {}
@@ -41,5 +45,15 @@ export class DocumentsController {
     const orgId = session.session.activeOrganizationId;
     if (!orgId) throw new ForbiddenException();
     return this.documentsService.getAllDocuments(orgId);
+  }
+
+  @Get('view/:id')
+  viewDocument(@Param('id') id: string, @Res() response: Response) {
+    return this.documentsService.viewDocument(id, response);
+  }
+
+  @Sse(':id/events')
+  events(@Param('id') id: string): Observable<MessageEvent> {
+    return this.documentsService.subscribe(id);
   }
 }

@@ -8,55 +8,34 @@ datasource db {
   provider = "postgresql"
 }
 
-enum Subscription_Plan {
-  FREE
-  PRO
-  ENTERPRISE
-}
-
-enum Subscription_Status {
-  INCOMPLETE
-  INCOMPLETE_EXPIRED
-  TRIALING
-  ACTIVE
-  PAST_DUE
-  CANCELED
-  UNPAID
-  PAUSED
-}
-
 model User {
-  id            String    @id @default(nanoid())
+  id            String       @id @default(nanoid())
   name          String
-  email         String
-  emailVerified Boolean   @default(false)
+  email         String       @unique
+  emailVerified Boolean      @default(false)
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  sessions      Session[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
   accounts      Account[]
+  invitations   Invitation[]
+  members       Member[]
+  sessions      Session[]
 
-  members     Member[]
-  invitations Invitation[]
-
-  @@unique([email])
   @@map("user")
 }
 
 model Session {
-  id        String   @id @default(nanoid())
-  expiresAt DateTime
-  token     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  ipAddress String?
-  userAgent String?
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  id                   String   @id @default(nanoid())
+  expiresAt            DateTime
+  token                String   @unique
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  ipAddress            String?
+  userAgent            String?
+  userId               String
   activeOrganizationId String?
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([token])
   @@index([userId])
   @@map("session")
 }
@@ -66,7 +45,6 @@ model Account {
   accountId             String
   providerId            String
   userId                String
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   accessToken           String?
   refreshToken          String?
   idToken               String?
@@ -76,6 +54,7 @@ model Account {
   password              String?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@map("account")
@@ -96,27 +75,26 @@ model Verification {
 model Organization {
   id            String          @id @default(nanoid())
   name          String
-  slug          String
+  slug          String          @unique
   logo          String?
   createdAt     DateTime
   metadata      String?
-  members       Member[]
   invitations   Invitation[]
+  members       Member[]
   stripeAccount Stripe_Account?
   subscription  Subscription?
 
-  @@unique([slug])
   @@map("organization")
 }
 
 model Member {
   id             String       @id @default(nanoid())
   organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   userId         String
-  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   role           String       @default("member")
   createdAt      DateTime
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([organizationId])
   @@index([userId])
@@ -126,7 +104,6 @@ model Member {
 model Invitation {
   id             String       @id @default(nanoid())
   organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   email          String
   role           String?
   status         String       @default("pending")
@@ -134,6 +111,7 @@ model Invitation {
   createdAt      DateTime     @default(now())
   inviterId      String
   user           User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@index([organizationId])
   @@index([email])
@@ -143,9 +121,9 @@ model Invitation {
 model Stripe_Account {
   id                 String       @id @default(nanoid())
   organizationId     String       @unique
-  organization       Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   stripe_customer_id String
   createdAt          DateTime     @default(now())
+  organization       Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@map("stripe_account")
 }
@@ -166,9 +144,7 @@ model Plan {
 model Subscription {
   id                   String              @id @default(nanoid())
   organizationId       String              @unique
-  organization         Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   planId               String
-  plan                 Plan                @relation(fields: [planId], references: [id])
   stripeSubscriptionId String?
   stripeCustomerId     String?
   status               Subscription_Status
@@ -178,25 +154,49 @@ model Subscription {
   canceledAt           DateTime?
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt
+  organization         Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  plan                 Plan                @relation(fields: [planId], references: [id])
 
   @@map("subscription")
 }
 
 model File {
-  id String @id @default(nanoid())
-
-  fileName String
-  fileType String
-  mimeType String
-
-  fileSize Int
-
+  id         String     @id @default(nanoid())
   url        String
   publicId   String
   identifier String
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  fileType   String
+  fileSize   Int
+  fileName   String
+  mimeType   String
+  status     FileStatus
+  message    String?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
 
   @@map("file")
+}
+
+enum Subscription_Plan {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+enum FileStatus {
+  UPLOADED
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum Subscription_Status {
+  INCOMPLETE
+  INCOMPLETE_EXPIRED
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+  PAUSED
 }

@@ -18,6 +18,16 @@ export const Subscription_Plan = {
 export type Subscription_Plan = (typeof Subscription_Plan)[keyof typeof Subscription_Plan]
 
 
+export const FileStatus = {
+  UPLOADED: 'UPLOADED',
+  PROCESSING: 'PROCESSING',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED'
+} as const
+
+export type FileStatus = (typeof FileStatus)[keyof typeof FileStatus]
+
+
 export const Subscription_Status = {
   INCOMPLETE: 'INCOMPLETE',
   INCOMPLETE_EXPIRED: 'INCOMPLETE_EXPIRED',

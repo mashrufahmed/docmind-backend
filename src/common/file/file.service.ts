@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
 import { Readable } from 'stream';
+
 export const ALLOWED_MIME_TYPES = [
   // Documents
   'application/pdf',
@@ -42,6 +43,7 @@ export class FileService {
           resource_type: 'auto',
         },
         (error, result) => {
+          console.log(error);
           if (error) return reject(error);
           resolve(result!);
         },

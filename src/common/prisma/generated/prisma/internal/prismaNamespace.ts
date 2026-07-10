@@ -1406,13 +1406,15 @@ export type SubscriptionScalarFieldEnum = (typeof SubscriptionScalarFieldEnum)[k
 
 export const FileScalarFieldEnum = {
   id: 'id',
-  fileName: 'fileName',
-  fileType: 'fileType',
-  mimeType: 'mimeType',
-  fileSize: 'fileSize',
   url: 'url',
   publicId: 'publicId',
   identifier: 'identifier',
+  fileType: 'fileType',
+  fileSize: 'fileSize',
+  fileName: 'fileName',
+  mimeType: 'mimeType',
+  status: 'status',
+  message: 'message',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1538,6 +1540,20 @@ export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'In
  * Reference to a field of type 'Int[]'
  */
 export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+/**
+ * Reference to a field of type 'FileStatus'
+ */
+export type EnumFileStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FileStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'FileStatus[]'
+ */
+export type ListEnumFileStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FileStatus[]'>
     
 
 
