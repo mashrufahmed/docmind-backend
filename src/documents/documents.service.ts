@@ -9,14 +9,17 @@ import * as https from 'https';
 import path from 'path';
 import { Subject } from 'rxjs';
 import { FileService } from 'src/common/file/file.service';
+import { FileStatus } from 'src/common/prisma/generated/prisma/enums';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { JobData, QueueService } from 'src/common/queue/queue.service';
+import { ParserFactory } from './parsers/parser.factory';
 @Injectable()
 export class DocumentsService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly fileService: FileService,
     private readonly queueService: QueueService,
+    private readonly parserFactory: ParserFactory,
   ) {}
   private subjects = new Map<string, Subject<MEvent>>();
 
@@ -108,6 +111,22 @@ export class DocumentsService {
         id: id,
       },
     });
-    console.log(file);
+    await this.prismaService.file.update({
+      where: {
+        id: file?.id,
+      },
+      data: {
+        status: FileStatus.PROCESSING,
+      },
+    });
+
+    const response = await fetch(file?.url as string);
+    if (!response.ok) {
+      throw new Error('Failed to download document');
+    }
+    const buffer = Buffer.from(await response.arrayBuffer());
+    const parser = this.parserFactory.get(file?.mimeType as string);
+    const text = await parser.parse(buffer);
+    console.log(text);
   }
 }

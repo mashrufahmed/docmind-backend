@@ -2,26 +2,8 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
 import { Readable } from 'stream';
+import { ALLOWED_FILE_TYPES } from '../constants';
 
-export const ALLOWED_MIME_TYPES = [
-  // Documents
-  'application/pdf',
-  'application/msword',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-
-  // Text
-  'text/plain',
-  'text/markdown',
-
-  // Presentation
-  'application/vnd.ms-powerpoint',
-  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-
-  // Spreadsheet
-  'application/vnd.ms-excel',
-  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  'text/csv',
-];
 @Injectable()
 export class FileService {
   private readonly cloudinary = cloudinary;
@@ -34,7 +16,7 @@ export class FileService {
   }
 
   async uploadFile(file: Express.Multer.File) {
-    if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+    if (!ALLOWED_FILE_TYPES.includes(file.mimetype)) {
       throw new BadRequestException('Unsupported file type.');
     }
     return new Promise<UploadApiResponse>((resolve, reject) => {
